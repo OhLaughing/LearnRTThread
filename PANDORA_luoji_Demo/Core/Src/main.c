@@ -54,8 +54,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 void led_switch(int i);
-void test_key_led();
-void test_usart();
+void test_key_led(void);
+void test_usart(void);
+void test_led_with_exti(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -100,11 +101,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  test_usart();
+  test_led_with_exti();
   /* USER CODE END 3 */
 }
 
-// key0 control led, switch Red green blue once key0 is pressed
+// key0 控制红绿蓝轮流亮
 void test_key_led(){
 	int i=0;
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7,GPIO_PIN_RESET);
@@ -122,10 +123,50 @@ void test_key_led(){
 			
 		}
 		delay_ms(10);
+		
     /* USER CODE BEGIN 3 */
   }
 }
- //
+
+// 用外部中断的方式实现，
+void test_led_with_exti(){
+	int i=0;
+	while(1){
+		printf("\r\ntest_led_with_exti,%d\r\n",i++);
+		delay_ms(1000);
+	}
+}
+
+//外部中断入口函数,
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+		printf("HAL_GPIO_EXTI_Callback\r\n");
+    delay_ms(50);      //消抖
+    switch(GPIO_Pin)
+	{
+
+
+		case  GPIO_PIN_8:		//控制LED_B灯状态翻转
+			if( KEY2 == 0)
+				LED_B_TogglePin;
+			break;
+
+		case  GPIO_PIN_9:		//控制LED_G灯状态翻转
+			if( KEY1 == 0)
+			LED_G_TogglePin;
+			break;
+
+		case  GPIO_PIN_10:		//控制LED_R灯状态翻转
+			if( KEY0 == 0)
+				LED_R_TogglePin;
+			break;
+		default:
+			break;
+	}
+}
+
+
+ // 串口的测试程序
 void test_usart(){
 	u8 len;
 	u16 times = 0;
@@ -153,7 +194,7 @@ void test_usart(){
             }
 
             if(times % 200 == 0)printf("请输入数据,以回车键结束\r\n");
-            if(times % 30 == 0)LED_B_TogglePin; //闪烁LED,提示系统正在运行.
+            if(times % 30 == 0)LED_R_TogglePin; //闪烁LED,提示系统正在运行.
 
             delay_ms(10);
         }
@@ -292,9 +333,16 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PD8 PD9 PD10 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
