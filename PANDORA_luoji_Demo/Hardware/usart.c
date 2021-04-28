@@ -26,7 +26,7 @@
  *	******************************************************************************/
 
 
-#if 1
+#if 0
 #pragma import(__use_no_semihosting)
 //标准库需要的支持函数
 struct __FILE
@@ -132,6 +132,20 @@ void uart_init(u32 bound)
 
 //}
 
+void usart_send(char*str){
+	 while (*str != '\0')
+    {
+        /* 换行 */
+        if (*str == '\n')
+        {
+            USART1->TDR = '\r';
+            while((USART1->ISR & 0X40) == 0); //直到发送完毕
+        }
+ 
+        USART1->TDR = *str++;
+        while((USART1->ISR & 0X40) == 0); //直到发送完毕
+    }
+}
 
 /**
  * @brief	串口1中断服务程序

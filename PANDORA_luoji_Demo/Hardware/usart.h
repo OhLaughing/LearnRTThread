@@ -39,7 +39,7 @@ extern u8 aRxBuffer[RXBUFFERSIZE];//HAL库USART接收Buffer
 
 //如果想串口中断接收，请不要注释以下宏定义
 void uart_init(u32 bound);
-
+void usart_send(char*);
 
 
 #endif

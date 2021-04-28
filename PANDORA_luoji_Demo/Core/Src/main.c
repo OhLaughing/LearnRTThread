@@ -101,7 +101,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  test_led_with_exti();
+  test_usart();
   /* USER CODE END 3 */
 }
 
@@ -130,9 +130,9 @@ void test_key_led(){
 
 // 用外部中断的方式实现，
 void test_led_with_exti(){
-	int i=0;
+	
 	while(1){
-		printf("\r\ntest_led_with_exti,%d\r\n",i++);
+		usart_send("\r\ntest_led_with_exti,%d\r\n");
 		delay_ms(1000);
 	}
 }
@@ -140,7 +140,7 @@ void test_led_with_exti(){
 //外部中断入口函数,
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-		printf("HAL_GPIO_EXTI_Callback\r\n");
+		usart_send("HAL_GPIO_EXTI_Callback\r\n");
     delay_ms(50);      //消抖
     switch(GPIO_Pin)
 	{
@@ -165,7 +165,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	}
 }
 
-
  // 串口的测试程序
 void test_usart(){
 	u8 len;
@@ -175,12 +174,12 @@ void test_usart(){
         if(USART_RX_STA & 0x8000)
         {
             len = USART_RX_STA & 0x3fff; //得到此次接收到的数据长度
-            printf("\r\n您发送的消息为:\r\n");
+            usart_send("\r\n您发送的消息为:\r\n");
             HAL_UART_Transmit(&UART1_Handler, (uint8_t*)USART_RX_BUF, len, 1000);	//发送接收到的数据
 
             while(__HAL_UART_GET_FLAG(&UART1_Handler, UART_FLAG_TC) != SET);		//等待发送结束
 
-            printf("\r\n\r\n");//插入换行
+            usart_send("\r\n\r\n");//插入换行
             USART_RX_STA = 0;
         }
         else
@@ -189,12 +188,12 @@ void test_usart(){
 
             if(times % 5000 == 0)
             {
-                printf("\r\nALIENTEK 潘多拉 STM32L475 IOT开发板 串口实验\r\n");
-                printf("正点原子@ALIENTEK\r\n\r\n\r\n");
+                usart_send("\r\nALIENTEK 潘多拉 STM32L475 IOT开发板 串口实验\r\n");
+                usart_send("正点原子@ALIENTEK\r\n\r\n\r\n");
             }
 
-            if(times % 200 == 0)printf("请输入数据,以回车键结束\r\n");
-            if(times % 30 == 0)LED_R_TogglePin; //闪烁LED,提示系统正在运行.
+            if(times % 200 == 0)usart_send("请输入数据,以回车键结束\r\n");
+            if(times % 30 == 0)LED_B_TogglePin; //闪烁LED,提示系统正在运行.
 
             delay_ms(10);
         }
