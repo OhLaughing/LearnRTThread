@@ -57,7 +57,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-
+extern int thread_sample_init(void);
 /**
   * @brief  The application entry point.
   * @retval int
@@ -92,13 +92,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	
   while (1)
   {
     /* USER CODE END WHILE */
-				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET); 	//PE7 ?1
-        rt_thread_mdelay(500);
-        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);	//PE7 ?0
-        rt_thread_mdelay(500);
+				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_SET); 	//PE7 ?1
+        rt_thread_mdelay(200);
+        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_RESET);	//PE7 ?0
+        rt_thread_mdelay(200);
+				rt_kprintf("test\n");
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
