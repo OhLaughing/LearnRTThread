@@ -64,25 +64,21 @@ RT_WEAK void *rt_heap_end_get(void)
  */
 
 void delay_init(int);	
-void uart_init(void);
+void uart_init(int);
 void rt_hw_board_init()
 {
 	
-		  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-   SystemClock_Config();
-	delay_init(80);
+		HAL_Init();
+    SystemClock_Config();	//初始化系统时钟为80M
+    delay_init(80); 		//初始化延时函数    80M系统时钟
+   uart_init(115200);
+#if 0
     /* System Clock Update */
     SystemCoreClockUpdate();
     
     /* System Tick Configuration */
     _SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
-
+#endif
     /* Call components board initial (use INIT_BOARD_EXPORT()) */
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
@@ -92,7 +88,7 @@ void rt_hw_board_init()
     rt_system_heap_init(rt_heap_begin_get(), rt_heap_end_get());
 #endif
 
-	uart_init();
+	
 }
 
 void SysTick_Handler(void)

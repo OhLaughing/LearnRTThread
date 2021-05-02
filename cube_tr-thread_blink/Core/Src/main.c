@@ -96,11 +96,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_SET); 	//PE7 ?1
+				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET); 	//PE7 ?1
         rt_thread_mdelay(200);
-        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_RESET);	//PE7 ?0
+        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);	//PE7 ?0
         rt_thread_mdelay(200);
-				rt_kprintf("test\n");
+				rt_kprintf("rt_kprintf\r\n");
+				printf("printf\r\n");
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
