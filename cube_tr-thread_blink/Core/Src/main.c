@@ -20,7 +20,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <rtthread.h>
 
+#define THREAD_PRIORITY         25
+#define THREAD_STACK_SIZE       512
+#define THREAD_TIMESLICE        5
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -47,8 +51,7 @@
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -57,7 +60,67 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-extern int thread_sample_init(void);
+
+static void thread1_entry(void *parameter){
+
+ while (1)
+  {
+    /* USER CODE END WHILE */
+				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET); 	//PE7 ?1
+        rt_thread_delay(200);
+        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);	//PE7 ?0
+        rt_thread_delay(200);
+
+			
+    /* USER CODE BEGIN 3 */
+  }
+}
+static rt_thread_t tid1 = RT_NULL;
+void test_led_blink_thread(){
+
+	tid1 = rt_thread_create("thread1",
+                            thread1_entry, 
+														RT_NULL,
+                            THREAD_STACK_SIZE,
+                            THREAD_PRIORITY, THREAD_TIMESLICE);
+	if (tid1 != RT_NULL){
+ 
+		rt_thread_startup(tid1);	
+	}
+
+}
+
+ALIGN(RT_ALIGN_SIZE)
+static char thread2_stack[1024];
+static struct rt_thread thread2;
+/* 线程2入口 */
+static void thread2_entry(void *param)
+{
+    rt_uint32_t count = 0;
+
+    /* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
+    for (count = 0; count < 10 ; count++)
+    {
+        /* 线程2打印计数值 */
+        rt_kprintf("thread2 count: %d\n", count);
+			rt_thread_delay(500);
+    }
+    rt_kprintf("thread2 exit\n");
+    /* 线程2运行结束后也将自动被系统删除
+    (线程控制块和线程栈依然在idle线程中释放) */
+}
+
+void test_static_mem(){
+	rt_thread_init(&thread2,
+										 "thread2",
+										 thread2_entry,
+										 RT_NULL,
+										 &thread2_stack[0],
+										 sizeof(thread2_stack),
+										 THREAD_PRIORITY - 1, THREAD_TIMESLICE);
+			rt_thread_startup(&thread2);
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -93,19 +156,18 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-  while (1)
-  {
-    /* USER CODE END WHILE */
-				HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET); 	//PE7 ?1
-        rt_thread_mdelay(200);
-        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);	//PE7 ?0
-        rt_thread_mdelay(200);
-				rt_kprintf("rt_kprintf\r\n");
-				printf("printf\r\n");
-    /* USER CODE BEGIN 3 */
-  }
+	test_led_blink_thread();
+	//test_static_mem();
+	while(1){
+		rt_thread_delay(200);
+
+	}
+	return 0;
+  
   /* USER CODE END 3 */
 }
+
+
 
 /**
   * @brief System Clock Configuration
@@ -158,7 +220,7 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
+void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 

@@ -1,6 +1,6 @@
 #include "usart.h"
 #include "delay.h"
-
+#include "rtthread.h"
 /*********************************************************************************
 			  ___   _     _____  _____  _   _  _____  _____  _   __
 			 / _ \ | |   |_   _||  ___|| \ | ||_   _||  ___|| | / /
@@ -26,7 +26,7 @@
  *	******************************************************************************/
 
 
-#if 1
+#if 0
 #pragma import(__use_no_semihosting)
 //标准库需要的支持函数
 struct __FILE
@@ -204,5 +204,22 @@ void rt_hw_console_output(const char *str)
 
 	}
 
+char rt_hw_console_getchar(void)
+{
+    int ch = -1;
 
+    if (__HAL_UART_GET_FLAG(&UART1_Handler, UART_FLAG_RXNE) != RESET)
+    {
+        ch = UART1_Handler.Instance->RDR & 0xff;
+    }
+    else
+    {
+        if(__HAL_UART_GET_FLAG(&UART1_Handler, UART_FLAG_ORE) != RESET)
+        {
+            __HAL_UART_CLEAR_OREFLAG(&UART1_Handler);
+        }
+        rt_thread_mdelay(10);
+    }
+    return ch;
+}
 
