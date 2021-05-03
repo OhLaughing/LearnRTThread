@@ -172,9 +172,9 @@ void test_usart(){
 	u16 times = 0;
      while(1)
     {
-        if(USART_RX_STA & 0x8000)
+        if(USART_RX_STA & 0x8000)  //最高位为1表示接收完成
         {
-            len = USART_RX_STA & 0x3fff; //得到此次接收到的数据长度
+            len = USART_RX_STA & 0x3fff; //得到此次接收到的数据长度，0~13位表示接收到的长度
             usart_send("\r\n您发送的消息为:\r\n");
             HAL_UART_Transmit(&UART1_Handler, (uint8_t*)USART_RX_BUF, len, 1000);	//发送接收到的数据
 
@@ -194,7 +194,7 @@ void test_usart(){
             }
 
             if(times % 200 == 0)usart_send("请输入数据,以回车键结束\r\n");
-            if(times % 30 == 0)LED_B_TogglePin; //闪烁LED,提示系统正在运行.
+            if(times % 30 == 0)LED_G_TogglePin; //闪烁LED,提示系统正在运行.
 
             delay_ms(10);
         }

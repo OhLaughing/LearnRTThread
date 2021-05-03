@@ -69,7 +69,7 @@ int fputc(int ch, FILE *f)
 //注意,读取USARTx->SR能避免莫名其妙的错误
 u8 USART_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 //接收状态
-//bit15，	接收完成标志
+//bit15，	接收完成标志,为1表示接收完成
 //bit14，	接收到0x0d
 //bit13~0，	接收到的有效字节数目
 u16 USART_RX_STA = 0;     //接收状态标记
@@ -84,6 +84,7 @@ UART_HandleTypeDef UART1_Handler; //UART句柄
  *
  * @return  void
  */
+ void Error_Handler();
 void uart_init(u32 bound)
 {
     //UART 初始化设置
@@ -94,8 +95,10 @@ void uart_init(u32 bound)
     UART1_Handler.Init.Parity = UART_PARITY_NONE;		  //无奇偶校验位
     UART1_Handler.Init.HwFlowCtl = UART_HWCONTROL_NONE; //无硬件流控
     UART1_Handler.Init.Mode = UART_MODE_TX_RX;		  //收发模式
-    HAL_UART_Init(&UART1_Handler);					    //HAL_UART_Init()会使能UART1
-
+    if(HAL_UART_Init(&UART1_Handler)!=HAL_OK)				    //HAL_UART_Init()会使能UART1
+		{
+			Error_Handler();
+		}
     __HAL_UART_ENABLE_IT(&UART1_Handler, UART_IT_RXNE); //开启接收中断
     HAL_NVIC_EnableIRQ(USART1_IRQn);					//使能USART1中断通道
     HAL_NVIC_SetPriority(USART1_IRQn, 3, 3);				//抢占优先级3，子优先级3
