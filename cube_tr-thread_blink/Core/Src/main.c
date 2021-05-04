@@ -22,7 +22,7 @@
 #include "main.h"
 #include <rtthread.h>
 
-#define THREAD_PRIORITY         25
+#define THREAD_PRIORITY         (RT_THREAD_PRIORITY_MAX -2)
 #define THREAD_STACK_SIZE       512
 #define THREAD_TIMESLICE        5
 /* Private includes ----------------------------------------------------------*/
